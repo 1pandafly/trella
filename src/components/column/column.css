@@ -1,0 +1,30 @@
+.column {
+    width: 300px;
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+.column-heading {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.column-heading button {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.column-add-wrapper {
+    margin-top: 10px;
+}
+
+.column-add-wrapper button {
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px;
+}

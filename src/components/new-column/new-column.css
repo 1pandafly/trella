@@ -1,0 +1,35 @@
+.new-column {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.new-column button {
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form-new-column {
+    border: 1px solid black;
+    border-radius: 2px;
+    padding: 5px;
+    height: fit-content;
+}
+
+.form-new-column .heading {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.form-new-column input {
+    width: 100%;
+}
+
+.form-new-column button {
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+}

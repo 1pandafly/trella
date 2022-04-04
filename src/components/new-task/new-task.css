@@ -1,0 +1,37 @@
+.form-add-task {
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid black;
+    border-radius: 2px;
+    padding: 5px;
+}
+
+.form-add-task .heading {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.form-add-task input {
+    width: 100%;
+}
+
+.form-add-task textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+.form-add-task button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.btn-add-new-task {
+    margin-top: 10px;
+    display: block;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px;
+}

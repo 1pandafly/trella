@@ -1,0 +1,27 @@
+.task {
+    margin-bottom: 5px;
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background: rgba(176, 231, 6, .39);
+    cursor: pointer;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-header button {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.task-text {
+    font-size: .7em;
+    margin-top: 5px;
+    padding: 5px;
+    background: rgba(176, 231, 6, .69);
+    border-radius: 2px;
+}
