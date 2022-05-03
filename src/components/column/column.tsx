@@ -3,26 +3,15 @@ import './column.css';
 import {useState} from "react";
 import NewTask from "../new-task";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
-
-type TaskItem = {
-    column: number,
-    id: number,
-    title: string,
-    text: string
-}
+import {TaskItem} from "./type";
 
 const Column = (props: {
     id: number,
     title: string,
     tasks: TaskItem[],
-    addTaskToState: (columnId: number, title: string, text: string) => void,
-    deleteTask: (taskId: number) => void,
-    deleteColumn: (columnId: number) => void
+    addTaskToState: (columnId: number, title: string, text: string, deadlineDate: Date) => void,
+    deleteColumn: (columnId: number) => void,
 }) => {
-
-    const tasks = props.tasks.map(task => {
-        return <Task id={task.id} title={task.title} text={task.text} key={task.id} deleteTask={props.deleteTask}/>;
-    });
 
     const [addingNewTask, addNewTask] = useState(false);
 
@@ -30,10 +19,10 @@ const Column = (props: {
         addNewTask(true);
     }
 
-    const confirmNewTask = (title: string, text: string) => {
+    const confirmNewTask = (title: string, text: string, deadlineDate: Date) => {
         if (title.trim().length > 0) {
             addNewTask(false);
-            props.addTaskToState(props.id, title, text);
+            props.addTaskToState(props.id, title, text, deadlineDate);
         }
     }
 
@@ -41,24 +30,41 @@ const Column = (props: {
         props.deleteColumn(props.id);
     }
 
+    const tasks = props.tasks
+        .sort((a: TaskItem, b: TaskItem) => {
+            return a.order - b.order;
+        })
+        .map(task => {
+        return (
+            <Task
+                id={task.id}
+                order={task.order}
+                title={task.title}
+                text={task.text}
+                deadlineDate={task.deadlineDate}
+                key={task.id}
+            />
+        );
+    });
+
     return (
-        <Droppable droppableId={String(props.id)}>
-            {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => {
-                return (
-                    <div className="column" ref={provided.innerRef} {...provided.droppableProps}>
-                        <div className="column-heading">
-                            {props.title}
-                            <button onClick={clickDeleteColumn}>X</button>
-                        </div>
-                        <div >
+        <div className="column">
+            <div className="column-heading">
+                {props.title}
+                <button onClick={clickDeleteColumn}>X</button>
+            </div>
+            <Droppable droppableId={String(props.id)}>
+                {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => {
+                    return (
+                        <div className="column-tasks-wrapper" ref={provided.innerRef} {...provided.droppableProps}>
                             {tasks}
+                            {provided.placeholder}
                         </div>
-                        <NewTask isAdding={addingNewTask} clickAddTask={clickAddTask} confirmNewTask={confirmNewTask}/>
-                        {provided.placeholder}
-                    </div>
-                )
-            }}
-        </Droppable>
+                    )
+                }}
+            </Droppable>
+            <NewTask isAdding={addingNewTask} clickAddTask={clickAddTask} confirmNewTask={confirmNewTask}/>
+        </div>
     );
 }
 

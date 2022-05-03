@@ -4,6 +4,14 @@ import {useState} from "react";
 import Column from "../column";
 import NewColumn from "../new-column";
 import {DragDropContext, DropResult, ResponderProvided} from "react-beautiful-dnd";
+import Modal from "../modal";
+import EditTask from "./type";
+import TableContext from "../context/context";
+
+interface MyContext {
+    deleteTask: (taskId: number) => void,
+    openModal: (task: EditTask) => void,
+}
 
 const App = () => {
     const [board, setBoard] = useState({
@@ -19,72 +27,117 @@ const App = () => {
         ],
         tasks: [
             {
-                column: 0,
-                id: 11,
-                title: 'task1',
-                text: 'text1 task'
+                columnId: 0,
+                order: 1,
+                id: 414,
+                title: 't1',
+                text: 'text1 task1',
+                deadlineDate: new Date('2022-04-05'),
             },
             {
-                column: 0,
-                id: 12,
-                title: 'task2',
-                text: 'text2 task'
-            },
-            {
-                column: 1,
+                columnId: 0,
+                order: 22,
                 id: 43,
-                title: 'taskwew1',
-                text: 'text1 task'
+                title: 't2',
+                text: 'text2 task',
+                deadlineDate: new Date('2022-05-07'),
             },
             {
-                column: 1,
-                id: 435,
-                title: 'tewewask2',
-                text: 'text2 task'
+                columnId: 1,
+                order: 1,
+                id: 73,
+                title: 't3',
+                text: 'text1 task',
+                deadlineDate: new Date('2022-04-09'),
+            },
+            {
+                columnId: 1,
+                order: 4,
+                id: 4,
+                title: 't4',
+                text: 'text2 task',
+                deadlineDate: new Date('2022-04-11'),
             },
         ]
     });
 
     const [addingNewColumn, addNewColumn] = useState(false);
 
-    const addTaskToState = (columnId: number, title: string, text: string) => {
-        const tasks = {...board};
-        tasks.tasks.push({
-            column: columnId,
-            id: Date.now(),
-            title: title,
-            text: text
-        });
+    const [editedTask, setEditedTask] = useState({
+        id: -1,
+        title: '',
+        text: '',
+        deadlineDate: new Date(),
+        isOpen: false
+    });
 
-        setBoard(tasks);
+    const openModal = (task: EditTask) => {
+        setEditedTask(prevState => {
+            return {...task, isOpen: true}
+        });
+    }
+
+    const closeModal = () => {
+        setEditedTask(prevState => {
+            return {...prevState, isOpen: false}
+        })
+    }
+
+    const addTaskToState = (columnId: number, title: string, text: string, deadlineDate: Date) => {
+        setBoard(prevState => {
+            const tasksFromCurrentColumn = prevState.tasks.filter(task => task.columnId === columnId)
+            let newOrderIndex;
+
+            if (tasksFromCurrentColumn.length === 0) {
+                newOrderIndex = 0;
+            } else {
+                newOrderIndex = tasksFromCurrentColumn.reduce((previousValue, currentValue) => Math.max(previousValue, currentValue.order), tasksFromCurrentColumn[0].order) + 1;
+            }
+
+            const newState = {...prevState};
+            newState.tasks.push({
+                columnId: columnId,
+                id: Date.now(),
+                title: title,
+                text: text,
+                deadlineDate: deadlineDate,
+                order: newOrderIndex
+            });
+
+            return newState;
+        });
     }
 
     const addColumnToState = (title: string) => {
-        const columns = {...board};
-        columns.columns.push({
-            id: Date.now(),
-            title: title
-        });
+        setBoard(prevState => {
+            const columns = {...prevState};
+            columns.columns.push({
+                id: Date.now(),
+                title: title
+            });
 
-        setBoard(columns);
+            return columns;
+        });
     }
 
     const deleteTask = (taskId: number) => {
-        const state = {...board};
-        let tasks = [...board.tasks];
+        setBoard(prevState => {
+            const state = {...board};
+            let tasks = [...board.tasks];
 
-        tasks = tasks.filter(item => item.id !== taskId);
+            tasks = tasks.filter(item => item.id !== taskId);
 
-        state.tasks = tasks;
+            state.tasks = tasks;
 
-        setBoard(state);
+            return state;
+        })
     }
 
     const deleteColumn = (columnId: number) => {
         const state = {...board};
 
         let tasks = [...board.tasks];
-        tasks = tasks.filter(item => item.column !== columnId);
+        tasks = tasks.filter(item => item.columnId !== columnId);
         state.tasks = tasks;
 
         let columns = [...board.columns];
@@ -93,13 +146,6 @@ const App = () => {
 
         setBoard(state);
     }
-
-    const columns = board.columns.map(column => {
-        const tasksFromColumn = board.tasks.filter(item => item.column === column.id);
-
-        return <Column id={column.id} title={column.title} tasks={tasksFromColumn} key={column.id}
-                       addTaskToState={addTaskToState} deleteTask={deleteTask} deleteColumn={deleteColumn}/>;
-    });
 
     const clickAddColumn = () => {
         addNewColumn(true);
@@ -113,31 +159,96 @@ const App = () => {
     }
 
     const onDragEnd = (result: DropResult, provided: ResponderProvided) => {
-        const state = {...board};
+        setBoard(prevState => {
+            const newState = {...prevState};
+            const newColumn = Number(result.destination?.droppableId);
+            let newOrder = Number(result.destination?.index);
 
-        const movedTask = state.tasks.filter(item => item.id === Number(result.draggableId))[0];
+            let tasks = newState.tasks.map(task => {
+                if (task.columnId === newColumn) {
+                    if (task.order >= newOrder) {
+                        task.order = task.order + 1;
+                    }
+                }
 
-        if (result.destination?.droppableId) {
-            movedTask.column = Number(result.destination?.droppableId);
-        }
+                return task;
+            });
 
-        let tasks = [...board.tasks];
-        tasks = tasks.filter(item => item.id !== Number(result.draggableId));
-        tasks.push(movedTask);
-        state.tasks = tasks;
+            tasks = tasks.filter(item => item.id !== Number(result.draggableId));
 
-        setBoard(state);
+            const movedTask = newState.tasks.filter(item => item.id === Number(result.draggableId))[0];
+            movedTask.order = newOrder;
+
+            if (result.destination?.index && result.destination?.index >= result.source.index && movedTask.columnId === newColumn) {
+                movedTask.order = newOrder + 2;
+            }
+
+            if (result.destination?.droppableId) {
+                movedTask.columnId = newColumn;
+            }
+
+            tasks.push(movedTask);
+
+            newState.tasks = tasks;
+
+            return newState;
+        })
     }
+
+    const confirmEditedTask = (editedTask: EditTask) => {
+        setEditedTask(prevState => {
+            return {...prevState, isOpen: false}
+        });
+
+        setBoard(prevState => {
+            const tasks = [...prevState.tasks];
+
+            tasks.map((task) => {
+                if (task.id === editedTask.id) {
+                    task.title = editedTask.title;
+                    task.text = editedTask.text;
+                    task.deadlineDate = editedTask.deadlineDate;
+                }
+
+                return task;
+            });
+
+            return {...prevState, ...tasks};
+        });
+    }
+
+    const contextForTasks: MyContext = {
+        deleteTask,
+        openModal
+    }
+
+    const columns = board.columns.map(column => {
+        const tasksFromColumn = board.tasks.filter(item => item.columnId === column.id);
+
+        return <Column
+            id={column.id}
+            title={column.title}
+            tasks={tasksFromColumn}
+            key={column.id}
+            addTaskToState={addTaskToState}
+            deleteColumn={deleteColumn}
+        />;
+    });
 
     return (
         <div className="main-wrapper">
             <Header/>
-            <div className="content-wrapper">
-                <DragDropContext onDragEnd={onDragEnd}>
-                    {columns}
-                    <NewColumn isAdding={addingNewColumn} clickAddColumn={clickAddColumn} confirmNewColumn={confirmNewColumn}/>
-                </DragDropContext>
-            </div>
+            <TableContext.Provider value={contextForTasks}>
+                <div className="content-wrapper">
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        {columns}
+                        <NewColumn isAdding={addingNewColumn} clickAddColumn={clickAddColumn}
+                                   confirmNewColumn={confirmNewColumn}/>
+                    </DragDropContext>
+                </div>
+                <Modal modalIsOpen={editedTask.isOpen} closeModal={closeModal} taskInfo={editedTask}
+                       confirmEditedTask={confirmEditedTask}/>
+            </TableContext.Provider>
         </div>
     )
 }

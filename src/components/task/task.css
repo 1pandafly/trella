@@ -3,8 +3,31 @@
     padding: 5px;
     border: 1px solid black;
     border-radius: 5px;
-    background: rgba(176, 231, 6, .39);
     cursor: pointer;
+}
+
+.ok {
+    background: rgba(176, 231, 6, .39);
+}
+
+.ok .task-text {
+    background: rgba(176, 231, 6, .69);
+}
+
+.warning {
+    background: rgba(230, 248, 1, .39);
+}
+
+.warning .task-text {
+    background: rgba(230, 248, 1, .69);
+}
+
+.danger {
+    background: rgba(231, 65, 65, .39);
+}
+
+.danger .task-text {
+    background: rgba(231, 65, 65, .69);
 }
 
 .task-header {
@@ -13,15 +36,24 @@
 }
 
 .task-header button {
-    width: 20px;
+    min-width: 20px;
     height: 20px;
     cursor: pointer;
+}
+
+.task-header .edit-button {
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .task-text {
     font-size: .7em;
     margin-top: 5px;
     padding: 5px;
-    background: rgba(176, 231, 6, .69);
     border-radius: 2px;
+}
+
+.task-deadline {
+    margin-top: 10px;
+    font-size: .7em;
 }
